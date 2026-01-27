@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電商神助手 - 專業任務請款系統</title>
+    <title>電商神助手 - 專業任務與報價請款系統</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -67,6 +67,13 @@
             background-color: #dcfce7;
             color: #166534;
         }
+        
+        /* Radio Button Styling */
+        .doc-type-radio:checked + label {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
@@ -97,12 +104,12 @@
         <!-- Sidebar / Input Form -->
         <aside class="w-96 bg-white border-r border-gray-200 flex flex-col overflow-y-auto p-6 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-1">
             <h2 class="text-lg font-bold mb-4 flex items-center">
-                <i class="fa-solid fa-pen-to-square mr-2 text-indigo-500"></i> 新增任務
+                <i class="fa-solid fa-pen-to-square mr-2 text-indigo-500"></i> 新增任務/項目
             </h2>
             
             <form id="taskForm" onsubmit="addTask(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">任務日期</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">日期</label>
                     <input type="date" id="taskDate" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                 </div>
 
@@ -112,23 +119,23 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">任務項目 (標題)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">項目名稱</label>
                     <input type="text" id="taskName" required placeholder="例如：首頁 Banner 設計" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">施作內容 (詳細描述)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">詳細內容</label>
                     <textarea id="taskDesc" rows="3" placeholder="詳細規格、尺寸或備註..." class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">報價金額 (NT$)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">金額 (NT$)</label>
                     <input type="number" id="taskPrice" required min="0" placeholder="0" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition">
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">
                     <input type="checkbox" id="isPaid" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
-                    <label for="isPaid" class="text-sm text-gray-700">已標記為「已請款」(歷史資料)</label>
+                    <label for="isPaid" class="text-sm text-gray-700">標記為「已結案/已收款」</label>
                 </div>
 
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow transition transform active:scale-95 flex items-center justify-center gap-2">
@@ -138,9 +145,12 @@
 
             <div class="mt-8 border-t pt-6">
                 <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                    <h3 class="text-blue-800 font-bold text-sm mb-1"><i class="fa-solid fa-circle-info mr-1"></i> 小提示</h3>
+                    <h3 class="text-blue-800 font-bold text-sm mb-1"><i class="fa-solid fa-circle-info mr-1"></i> 使用技巧</h3>
+                    <p class="text-xs text-blue-600 leading-relaxed mb-2">
+                        1. 建立項目後，勾選並點擊「產生文件」。
+                    </p>
                     <p class="text-xs text-blue-600 leading-relaxed">
-                        勾選右側列表中的「未請款」項目，點擊右上角的「產生請款單」，即可將多筆項目合併輸出一張 PNG圖片。
+                        2. 在預覽視窗中，您可以選擇輸出為<strong>「報價單」</strong>或<strong>「請款單」</strong>，系統會自動切換格式與銀行資訊。
                     </p>
                 </div>
             </div>
@@ -157,8 +167,8 @@
                     </div>
                     <select id="filterStatus" onchange="renderTable()" class="py-2 px-3 border border-gray-300 rounded-lg focus:outline-none bg-white shadow-sm text-sm">
                         <option value="all">所有狀態</option>
-                        <option value="pending">未請款</option>
-                        <option value="invoiced">已請款</option>
+                        <option value="pending">進行中 / 未收款</option>
+                        <option value="invoiced">已結案 / 已收款</option>
                     </select>
                 </div>
 
@@ -168,7 +178,7 @@
                         <span class="block text-xl font-bold text-indigo-600" id="selectedTotal">NT$ 0</span>
                     </div>
                     <button onclick="openInvoiceModal()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg shadow font-medium flex items-center gap-2 transition transform active:scale-95">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> 產生請款單
+                        <i class="fa-solid fa-file-pen"></i> 產生文件
                     </button>
                 </div>
             </div>
@@ -185,7 +195,7 @@
                                 <th class="p-4 w-32">日期</th>
                                 <th class="p-4 w-40">客戶</th>
                                 <th class="p-4">項目/內容</th>
-                                <th class="p-4 w-32 text-right">報價</th>
+                                <th class="p-4 w-32 text-right">金額</th>
                                 <th class="p-4 w-28 text-center">狀態</th>
                                 <th class="p-4 w-20 text-center">操作</th>
                             </tr>
@@ -198,14 +208,14 @@
                     <!-- Empty State -->
                     <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-gray-400">
                         <i class="fa-solid fa-clipboard-list text-5xl mb-4 text-gray-200"></i>
-                        <p>尚無任務資料，請從左側新增。</p>
+                        <p>尚無資料，請從左側新增。</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Invoice Modal -->
+    <!-- Document Modal -->
     <div id="invoiceModal" class="fixed inset-0 z-50 hidden opacity-0 pointer-events-none modal">
         <div class="absolute inset-0 bg-gray-900 bg-opacity-75 backdrop-blur-sm" onclick="closeInvoiceModal()"></div>
         
@@ -214,33 +224,48 @@
                 
                 <!-- Modal Header -->
                 <div class="bg-white p-4 border-b flex justify-between items-center shrink-0">
-                    <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-eye mr-2"></i> 請款單預覽</h3>
+                    <h3 class="text-lg font-bold text-gray-800"><i class="fa-solid fa-print mr-2"></i> 文件預覽與設定</h3>
                     <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600 transition">
                         <i class="fa-solid fa-xmark text-2xl"></i>
                     </button>
                 </div>
 
                 <!-- Modal Controls -->
-                <div class="bg-white p-4 border-b flex gap-4 items-center flex-wrap shrink-0 text-sm">
-                    <div class="flex items-center gap-2">
-                        <label class="font-medium">請款對象：</label>
-                        <input type="text" id="invoiceClientName" class="border rounded px-2 py-1 w-48" placeholder="輸入客戶名稱">
+                <div class="bg-white p-4 border-b shrink-0 text-sm">
+                    <div class="flex flex-wrap gap-4 items-center mb-3 pb-3 border-b border-gray-100">
+                        <!-- Doc Type Toggle -->
+                        <div class="flex bg-gray-100 p-1 rounded-lg">
+                            <input type="radio" name="docType" id="typeInvoice" value="invoice" class="hidden doc-type-radio" checked onchange="updateDocType()">
+                            <label for="typeInvoice" class="px-4 py-1.5 rounded-md cursor-pointer transition select-none font-medium text-gray-600 hover:text-gray-800">請款單 (Invoice)</label>
+                            
+                            <input type="radio" name="docType" id="typeQuote" value="quote" class="hidden doc-type-radio" onchange="updateDocType()">
+                            <label for="typeQuote" class="px-4 py-1.5 rounded-md cursor-pointer transition select-none font-medium text-gray-600 hover:text-gray-800">報價單 (Quote)</label>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label class="font-medium">文件對象：</label>
+                            <input type="text" id="invoiceClientName" class="border rounded px-2 py-1 w-48" placeholder="輸入客戶名稱">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="font-medium">文件單號：</label>
+                            <input type="text" id="invoiceNo" class="border rounded px-2 py-1 w-32" placeholder="NO-001">
+                        </div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="font-medium">單號：</label>
-                        <input type="text" id="invoiceNo" class="border rounded px-2 py-1 w-32" placeholder="INV-2023001">
-                    </div>
-                     <div class="flex items-center gap-2">
-                        <input type="checkbox" id="addTax" onchange="renderInvoicePreview()" class="rounded text-indigo-600">
-                        <label for="addTax" class="cursor-pointer select-none">加計 5% 營業稅</label>
-                    </div>
-                    <div class="ml-auto flex gap-2">
-                        <button onclick="downloadInvoiceImage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow font-medium transition">
-                            <i class="fa-solid fa-download mr-1"></i> 下載 PNG
-                        </button>
-                        <button onclick="markSelectedAsInvoiced()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-medium transition">
-                            <i class="fa-solid fa-check mr-1"></i> 標記為已請款
-                        </button>
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                         <div class="flex items-center gap-2">
+                            <input type="checkbox" id="addTax" onchange="renderInvoicePreview()" class="rounded text-indigo-600">
+                            <label for="addTax" class="cursor-pointer select-none">加計 5% 營業稅</label>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="downloadInvoiceImage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow font-medium transition">
+                                <i class="fa-solid fa-download mr-1"></i> 下載圖檔
+                            </button>
+                            <button id="markPaidBtn" onclick="markSelectedAsInvoiced()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-medium transition">
+                                <i class="fa-solid fa-check mr-1"></i> 標記為已收款
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -252,7 +277,7 @@
                         <!-- Branding Header -->
                         <div class="flex justify-between items-start border-b-2 border-indigo-600 pb-6 mb-6">
                             <div>
-                                <h1 class="text-3xl font-bold text-gray-800 mb-2">請款單 INVOICE</h1>
+                                <h1 id="docTitle" class="text-3xl font-bold text-gray-800 mb-2">請款單 INVOICE</h1>
                                 <div class="text-gray-500 text-sm">
                                     <p class="font-bold text-indigo-600 text-lg mb-1">電商神助手</p>
                                     <p>專業電商營運與技術支援</p>
@@ -261,11 +286,11 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-gray-500 text-sm mb-4">
-                                    <p class="mb-1">日期: <span id="dispDate" class="font-medium text-gray-800">2023-10-27</span></p>
-                                    <p>單號: <span id="dispNo" class="font-medium text-gray-800">INV-001</span></p>
+                                    <p class="mb-1"><span id="dateLabel">日期</span>: <span id="dispDate" class="font-medium text-gray-800">2023-10-27</span></p>
+                                    <p><span id="noLabel">單號</span>: <span id="dispNo" class="font-medium text-gray-800">INV-001</span></p>
                                 </div>
                                 <div class="bg-gray-50 p-3 rounded text-left min-w-[200px]">
-                                    <p class="text-xs text-gray-500 mb-1">致 (Bill To):</p>
+                                    <p id="toLabel" class="text-xs text-gray-500 mb-1">致 (Bill To):</p>
                                     <p id="dispClient" class="font-bold text-gray-800 text-lg">客戶名稱</p>
                                 </div>
                             </div>
@@ -305,19 +330,8 @@
                         </div>
 
                         <!-- Footer -->
-                        <div class="border-t border-gray-200 pt-6 text-sm text-gray-500">
-                            <h4 class="font-bold text-gray-700 mb-2">備註與匯款資訊</h4>
-                            <div class="grid grid-cols-2 gap-8">
-                                <div>
-                                    <p>1. 請確認款項無誤後，於期限內匯款。</p>
-                                    <p>2. 如有疑問請隨時聯繫我們。</p>
-                                </div>
-                                <div>
-                                    <p>銀行代碼：<span class="font-mono text-gray-800">000 (範例銀行)</span></p>
-                                    <p>銀行帳號：<span class="font-mono text-gray-800">1234-5678-9012</span></p>
-                                    <p>戶名：<span class="font-mono text-gray-800">電商神助手</span></p>
-                                </div>
-                            </div>
+                        <div id="docFooter" class="border-t border-gray-200 pt-6 text-sm text-gray-500">
+                            <!-- Dynamic Content filled by JS -->
                         </div>
                         
                         <!-- Decorative Bottom -->
@@ -370,15 +384,15 @@
             // Reset Date to today for convenience
             document.getElementById('taskDate').valueAsDate = new Date();
             renderTable();
-            showToast('任務已新增！', 'success');
+            showToast('已新增項目！', 'success');
         }
 
         function deleteTask(id) {
-            if(confirm('確定要刪除此任務嗎？')) {
+            if(confirm('確定要刪除此項目嗎？')) {
                 tasks = tasks.filter(t => t.id !== id);
                 saveData();
                 renderTable();
-                showToast('任務已刪除', 'info');
+                showToast('項目已刪除', 'info');
             }
         }
 
@@ -395,7 +409,6 @@
             const task = tasks.find(t => t.id === id);
             if (task) {
                 task.selected = !task.selected;
-                // Don't save selection state to localstorage permanently, just memory
                 renderTable();
             }
         }
@@ -403,7 +416,6 @@
         function toggleAll(source) {
             const visibleTasks = getFilteredTasks();
             visibleTasks.forEach(t => {
-                // Only select pending items usually, but let's allow all logic
                 t.selected = source.checked;
             });
             renderTable();
@@ -437,10 +449,9 @@
                     row.className = "hover:bg-gray-50 transition group";
                     
                     const statusBadge = task.status === 'invoiced' 
-                        ? `<span class="px-2 py-1 rounded-full text-xs font-bold status-badge-done border border-green-200">已請款</span>`
-                        : `<span class="px-2 py-1 rounded-full text-xs font-bold status-badge-pending border border-red-200">未請款</span>`;
+                        ? `<span class="px-2 py-1 rounded-full text-xs font-bold status-badge-done border border-green-200">已收款</span>`
+                        : `<span class="px-2 py-1 rounded-full text-xs font-bold status-badge-pending border border-red-200">進行中</span>`;
 
-                    // Disable checkbox if invoiced? Optional. Let's keep it flexible.
                     const isChecked = task.selected ? 'checked' : '';
 
                     row.innerHTML = `
@@ -470,7 +481,7 @@
             document.getElementById('selectedTotal').textContent = formatCurrency(selectedTotal);
         }
 
-        // --- Invoice Generation ---
+        // --- Document Generation & Mode Switching ---
 
         function openInvoiceModal() {
             const selected = tasks.filter(t => t.selected);
@@ -479,16 +490,20 @@
                 return;
             }
             
-            // Auto fill client name from first selected item if available
+            // Default to Invoice Mode logic reset or keep? Let's keep it responsive.
+            // But regenerate Random ID each open is safer for uniqueness
+            const today = new Date();
+            const dateStr = today.toISOString().slice(0,10).replace(/-/g,'');
+            // If currently quote is selected, generate QUO, else INV
+            const isQuote = document.getElementById('typeQuote').checked;
+            const prefix = isQuote ? 'QUO' : 'INV';
+            document.getElementById('invoiceNo').value = `${prefix}-${dateStr}-${Math.floor(Math.random() * 1000)}`;
+
+            // Auto fill client
             const firstClient = selected.find(t => t.client)?.client || '';
             document.getElementById('invoiceClientName').value = firstClient;
             
-            // Auto generate Invoice No (Date + Random)
-            const today = new Date();
-            const dateStr = today.toISOString().slice(0,10).replace(/-/g,'');
-            document.getElementById('invoiceNo').value = `INV-${dateStr}-${Math.floor(Math.random() * 1000)}`;
-            
-            renderInvoicePreview();
+            updateDocType(); // Will trigger render
             
             const modal = document.getElementById('invoiceModal');
             modal.classList.remove('hidden', 'pointer-events-none');
@@ -507,8 +522,42 @@
             }, 250);
         }
 
+        function updateDocType() {
+            const type = document.querySelector('input[name="docType"]:checked').value;
+            const docTitle = document.getElementById('docTitle');
+            const markBtn = document.getElementById('markPaidBtn');
+            const noInput = document.getElementById('invoiceNo');
+            const dateLabel = document.getElementById('dateLabel');
+            const noLabel = document.getElementById('noLabel');
+            const toLabel = document.getElementById('toLabel');
+
+            if (type === 'quote') {
+                docTitle.textContent = '報價單 QUOTATION';
+                docTitle.className = "text-3xl font-bold text-gray-800 mb-2"; // Normal color
+                markBtn.style.display = 'none'; // Quotes don't mark as paid usually
+                if(noInput.value.includes('INV-')) noInput.value = noInput.value.replace('INV-', 'QUO-');
+                
+                dateLabel.textContent = "報價日期";
+                noLabel.textContent = "報價單號";
+                toLabel.textContent = "致 (Quotation For):";
+
+            } else {
+                docTitle.textContent = '請款單 INVOICE';
+                docTitle.className = "text-3xl font-bold text-gray-800 mb-2";
+                markBtn.style.display = 'inline-flex';
+                if(noInput.value.includes('QUO-')) noInput.value = noInput.value.replace('QUO-', 'INV-');
+                
+                dateLabel.textContent = "日期";
+                noLabel.textContent = "單號";
+                toLabel.textContent = "致 (Bill To):";
+            }
+            renderInvoicePreview();
+        }
+
         function renderInvoicePreview() {
             const selected = tasks.filter(t => t.selected);
+            const type = document.querySelector('input[name="docType"]:checked').value;
+            
             const tbody = document.getElementById('invoiceItemsBody');
             tbody.innerHTML = '';
 
@@ -545,6 +594,36 @@
                 taxRow.classList.add('hidden');
             }
             document.getElementById('invoiceTotal').textContent = formatCurrency(total);
+
+            // Footer Content Switching
+            const footer = document.getElementById('docFooter');
+            if (type === 'quote') {
+                footer.innerHTML = `
+                    <h4 class="font-bold text-gray-700 mb-2">條款與備註</h4>
+                    <div class="grid grid-cols-1 gap-8">
+                        <div>
+                            <p>1. 本報價單有效期限為 15 天，逾期請重新詢價。</p>
+                            <p>2. 確認報價後，請簽名回傳或回信確認，以利排程製作。</p>
+                            <p>3. 報價金額未含稅（或依上方顯示為準），專案依實際執行項目結算。</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                footer.innerHTML = `
+                    <h4 class="font-bold text-gray-700 mb-2">備註與匯款資訊</h4>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <p>1. 請確認款項無誤後，於期限內匯款。</p>
+                            <p>2. 如有疑問請隨時聯繫我們。</p>
+                        </div>
+                        <div>
+                            <p>銀行：<span class="font-mono text-gray-800 font-bold">LINE Bank (824 連線商業銀行)</span></p>
+                            <p>帳號：<span class="font-mono text-gray-800 font-bold text-lg">111006760679</span></p>
+                            <p>戶名：<span class="font-mono text-gray-800">張凱軍</span></p>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // --- Export PNG ---
@@ -553,37 +632,41 @@
             const invoiceElement = document.getElementById('invoice-preview-area');
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
+            const no = document.getElementById('invoiceNo').value;
+            const type = document.querySelector('input[name="docType"]:checked').value;
+            const typeName = type === 'quote' ? '報價單' : '請款單';
+
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 處理中...';
             btn.disabled = true;
 
             html2canvas(invoiceElement, {
-                scale: 2, // High resolution
+                scale: 2, 
                 useCORS: true,
                 backgroundColor: "#ffffff"
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `請款單_${document.getElementById('invoiceNo').value}.png`;
+                link.download = `${typeName}_${no}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                showToast('請款單下載成功！', 'success');
+                showToast(`${typeName} 下載成功！`, 'success');
             });
         }
 
         function markSelectedAsInvoiced() {
-            if(confirm('確定將目前請款單上的項目都標記為「已請款」嗎？')) {
+            if(confirm('確定將目前項目標記為「已收款」嗎？')) {
                 tasks.forEach(t => {
                     if (t.selected) {
                         t.status = 'invoiced';
-                        t.selected = false; // Reset selection
+                        t.selected = false;
                     }
                 });
                 saveData();
                 renderTable();
                 closeInvoiceModal();
-                showToast('狀態已更新為已請款', 'success');
+                showToast('狀態已更新', 'success');
             }
         }
 
@@ -594,8 +677,6 @@
                 showToast('沒有資料可匯出', 'error');
                 return;
             }
-            
-            // BOM for Excel Chinese support
             const bom = "\uFEFF";
             let csvContent = "data:text/csv;charset=utf-8," + bom;
             csvContent += "ID,日期,客戶名稱,項目名稱,詳細內容,金額,狀態\n";
@@ -604,11 +685,11 @@
                 const row = [
                     t.id,
                     t.date,
-                    `"${(t.client || '').replace(/"/g, '""')}"`, // Escape quotes
+                    `"${(t.client || '').replace(/"/g, '""')}"`,
                     `"${t.name.replace(/"/g, '""')}"`,
                     `"${(t.desc || '').replace(/"/g, '""')}"`,
                     t.price,
-                    t.status === 'invoiced' ? '已請款' : '未請款'
+                    t.status === 'invoiced' ? '已收款' : '進行中'
                 ];
                 csvContent += row.join(",") + "\n";
             });
@@ -616,7 +697,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `任務列表_backup_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute("download", `電商神助手_任務備份_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -630,25 +711,15 @@
             reader.onload = function(e) {
                 const text = e.target.result;
                 const lines = text.split('\n');
-                
-                // Skip header (i=1), simple parsing logic
-                // Note: This simple parser might break if CSV has complex line breaks inside quotes
-                // For a lightweight app, this is usually acceptable or use a library like PapaParse
                 let addedCount = 0;
                 
                 for (let i = 1; i < lines.length; i++) {
                     const line = lines[i].trim();
                     if (!line) continue;
-                    
-                    // Simple Regex to split by comma ignoring quotes
                     const cols = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                     
                     if (cols && cols.length >= 6) {
-                        // Clean quotes
                         const clean = (str) => str ? str.replace(/^"|"$/g, '').replace(/""/g, '"') : '';
-                        
-                        // Try to map columns. Assuming format matches export
-                        // If imported from unknown source, ID might clash, so we generate new ID
                         const newTask = {
                             id: Date.now() + i, 
                             date: clean(cols[1]) || new Date().toISOString().slice(0,10),
@@ -656,18 +727,17 @@
                             name: clean(cols[3]),
                             desc: clean(cols[4]),
                             price: parseInt(clean(cols[5])) || 0,
-                            status: clean(cols[6]) === '已請款' ? 'invoiced' : 'pending',
+                            status: (clean(cols[6]) === '已收款' || clean(cols[6]) === '已請款') ? 'invoiced' : 'pending',
                             selected: false
                         };
                         tasks.unshift(newTask);
                         addedCount++;
                     }
                 }
-                
                 saveData();
                 renderTable();
                 showToast(`成功匯入 ${addedCount} 筆資料`, 'success');
-                input.value = ''; // Reset
+                input.value = '';
             };
             reader.readAsText(file);
         }
@@ -678,15 +748,8 @@
             const colors = type === 'success' ? 'bg-green-600' : (type === 'error' ? 'bg-red-600' : 'bg-gray-800');
             toast.className = `fixed bottom-4 right-4 ${colors} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-y-10 opacity-0 z-50 flex items-center gap-2`;
             toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i> ${message}`;
-            
             document.body.appendChild(toast);
-            
-            // Animate in
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-10', 'opacity-0');
-            });
-
-            // Remove
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
             setTimeout(() => {
                 toast.classList.add('translate-y-10', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
