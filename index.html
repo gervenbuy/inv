@@ -408,7 +408,7 @@ function openDocPreview(){
   const total=subtotal+tax;
   const isInv=docType==='inv';
   const title=isInv?'請款單 INVOICE':'報價單 QUOTATION';
-  const rows=sel.map(d=>`<tr><td>${d.date}</td><td>${d.project}</td><td>${d.detail||'—'}</td><td style="text-align:right">NT$ ${Number(d.amount).toLocaleString()}</td></tr>`).join('');
+  const rows=sel.map(d=>`<tr><td style="width:85px;white-space:nowrap;vertical-align:top;padding:8px;border:1px solid #e0e0e0">${d.date}</td><td style="width:32%;word-break:break-word;vertical-align:top;padding:8px;border:1px solid #e0e0e0">${d.project}</td><td style="word-break:break-word;vertical-align:top;padding:8px;border:1px solid #e0e0e0;color:#555">${d.detail||'—'}</td><td style="width:105px;white-space:nowrap;text-align:right;vertical-align:top;padding:8px;border:1px solid #e0e0e0;font-weight:600">NT$ ${Number(d.amount).toLocaleString()}</td></tr>`).join('');
   const bankInfo=isInv?`<div style="font-size:12px;color:#555;margin-top:1rem;border-top:1px solid #eee;padding-top:1rem;display:flex;align-items:center;gap:10px"><span style="font-size:18px">🏦</span><div><strong style="color:#1a1a1a">匯款資訊</strong><br>LINE Bank &nbsp;|&nbsp; 824 連線商業銀行<br>帳號：<strong style="color:#1a1a1a;letter-spacing:0.05em">111006760679</strong></div></div>`:'';
   const html=`<div class="modal-overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal" style="width:600px">
@@ -437,12 +437,12 @@ function openDocPreview(){
           <div style="font-size:11px;color:#888;margin-bottom:2px">${isInv?'致 (Bill To)':'報價對象'}</div>
           <div style="font-weight:600">${docTo}</div>
         </div>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;table-layout:fixed">
           <thead><tr style="background:#f0f0f0">
-            <th style="padding:8px;text-align:left;border:1px solid #e0e0e0">日期</th>
-            <th style="padding:8px;text-align:left;border:1px solid #e0e0e0">項目</th>
+            <th style="width:85px;padding:8px;text-align:left;border:1px solid #e0e0e0">日期</th>
+            <th style="width:32%;padding:8px;text-align:left;border:1px solid #e0e0e0">項目</th>
             <th style="padding:8px;text-align:left;border:1px solid #e0e0e0">內容</th>
-            <th style="padding:8px;text-align:right;border:1px solid #e0e0e0">金額</th>
+            <th style="width:105px;padding:8px;text-align:right;border:1px solid #e0e0e0">金額</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -469,7 +469,7 @@ function downloadDoc(){
     <div style="text-align:right"><h1 style="color:${d.isInv?'#185FA5':'#3B6D11'}">${d.title}</h1><p style="font-size:13px;color:#666">日期: ${d.todayStr}<br>單號: ${d.docNo}</p></div>
   </div>
   <div style="background:#f8f8f8;padding:10px;border-radius:6px;margin-bottom:1rem"><small style="color:#888">${d.isInv?'致 (Bill To)':'報價對象'}</small><p><strong>${d.docTo}</strong></p></div>
-  <table><thead><tr><th>日期</th><th>項目</th><th>內容</th><th style="text-align:right">金額</th></tr></thead><tbody>${d.rows}</tbody></table>
+  <table style="table-layout:fixed"><colgroup><col style="width:90px"><col style="width:32%"><col><col style="width:110px"></colgroup><thead><tr><th>日期</th><th>項目</th><th>內容</th><th style="text-align:right">金額</th></tr></thead><tbody>${d.rows}</tbody></table>
   <div style="text-align:right;margin-top:1rem">
     <p>小計: NT$ ${d.subtotal.toLocaleString()}</p>
     ${d.useTax?`<p>營業稅 5%: NT$ ${d.tax.toLocaleString()}</p>`:''}
