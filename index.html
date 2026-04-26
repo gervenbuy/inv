@@ -73,6 +73,14 @@ tbody td{padding:8px 12px;color:#1a1a1a;vertical-align:middle}
 .inline-edit input{border:1px solid #378ADD;border-radius:4px;padding:2px 6px;font-size:13px;background:#fff;color:#1a1a1a;width:100%}
 .icon-btn{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:8px;font-size:14px;color:#888}
 .icon-btn:hover{background:#f0f0f0}
+
+.sync-status{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+.sync-ok{background:#EAF3DE;color:#3B6D11}
+.sync-err{background:#FCEBEB;color:#A32D2D}
+.sync-loading{background:#E6F1FB;color:#185FA5}
+.sync-warn{background:#FAEEDA;color:#854F0B}
+.gas-input{font-size:12px;padding:5px 8px;border:1px solid #e0e0e0;border-radius:6px;background:#fff;color:#1a1a1a;width:100%;outline:none;margin-bottom:6px}
+.gas-input:focus{border-color:#378ADD}
 </style>
 </head>
 <body>
@@ -102,6 +110,19 @@ tbody td{padding:8px 12px;color:#1a1a1a;vertical-align:middle}
         <button class="btn btn-sm" style="flex:1" onclick="exportCSV()">↓ 匯出</button>
       </div>
       <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCSV(event)">
+    </div>
+
+    <div style="border-top:1px solid #e8e8e8;padding-top:1rem">
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>🔄 Google Sheets 同步</span>
+        <span id="sync-badge" class="sync-status sync-warn" style="text-transform:none;letter-spacing:0">未設定</span>
+      </div>
+      <input class="gas-input" id="gas-url" placeholder="貼上 Apps Script 網址..." oninput="saveGasUrl()">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <button class="btn btn-sm btn-primary" onclick="syncToSheet()" title="將網站資料推送到 Google Sheets">↑ 推送到表單</button>
+        <button class="btn btn-sm" onclick="syncFromSheet()" title="從 Google Sheets 拉取資料到網站" style="border-color:#185FA5;color:#185FA5">↓ 從表單拉取</button>
+      </div>
+      <div style="margin-top:6px;font-size:11px;color:#aaa" id="sync-time"></div>
     </div>
 
     <div style="border-top:1px solid #e8e8e8;padding-top:1rem">
@@ -523,6 +544,97 @@ function handleCSV(e){
 }
 
 renderTable();updateStats();
+
+// ═══════════════════════════════════════════
+//  Google Sheets 同步功能
+// ═══════════════════════════════════════════
+
+const GAS_URL_KEY = 'inv_gas_url';
+
+function saveGasUrl() {
+  const url = document.getElementById('gas-url').value.trim();
+  localStorage.setItem(GAS_URL_KEY, url);
+  updateSyncBadge(url ? 'ready' : 'unset');
+}
+
+function loadGasUrl() {
+  const defaultUrl = 'https://script.google.com/macros/s/AKfycbzh2waoReNYDWVVyWeTawXmVXqz1EIdyhn6od1buZmKJtDWY2akdUDLcxndnhyZiEdmNA/exec';
+  const stored = localStorage.getItem(GAS_URL_KEY);
+  const url = stored || defaultUrl;
+  if (!stored) localStorage.setItem(GAS_URL_KEY, defaultUrl);
+  document.getElementById('gas-url').value = url;
+  updateSyncBadge(url ? 'ready' : 'unset');
+}
+
+function updateSyncBadge(state, msg) {
+  const badge = document.getElementById('sync-badge');
+  badge.className = 'sync-status';
+  if (state === 'unset')   { badge.classList.add('sync-warn');    badge.textContent = '未設定'; }
+  if (state === 'ready')   { badge.classList.add('sync-ok');      badge.textContent = '已連線'; }
+  if (state === 'loading') { badge.classList.add('sync-loading'); badge.textContent = '⏳ 同步中...'; }
+  if (state === 'ok')      { badge.classList.add('sync-ok');      badge.textContent = '✓ ' + (msg||'成功'); }
+  if (state === 'error')   { badge.classList.add('sync-err');     badge.textContent = '✗ 失敗'; }
+}
+
+function setLastSyncTime() {
+  const now = new Date().toLocaleString('zh-TW', {hour12: false});
+  document.getElementById('sync-time').textContent = '上次同步：' + now;
+}
+
+// ── 推送：網站 → Sheets ─────────────────────────────────────
+async function syncToSheet() {
+  const url = (localStorage.getItem(GAS_URL_KEY) || '').trim();
+  if (!url) { alert('請先填入 Apps Script 網址！'); return; }
+
+  updateSyncBadge('loading');
+  try {
+    const payload = { action: 'sync', data: data };
+    const resp = await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    // no-cors 無法讀取 response，只要不拋錯就視為成功
+    updateSyncBadge('ok', '已推送');
+    setLastSyncTime();
+  } catch (err) {
+    updateSyncBadge('error');
+    alert('推送失敗：' + err.message + '\n請確認 Apps Script 已部署為「允許所有人」存取。');
+  }
+}
+
+// ── 拉取：Sheets → 網站 ─────────────────────────────────────
+async function syncFromSheet() {
+  const url = (localStorage.getItem(GAS_URL_KEY) || '').trim();
+  if (!url) { alert('請先填入 Apps Script 網址！'); return; }
+
+  updateSyncBadge('loading');
+  try {
+    const resp = await fetch(url + '?t=' + Date.now(), { method: 'GET' });
+    const json = await resp.json();
+    if (!json.success) throw new Error(json.error || '未知錯誤');
+
+    const incoming = json.data;
+    if (!Array.isArray(incoming)) throw new Error('資料格式錯誤');
+
+    // 合併策略：以 Sheet 資料為主，重設 checked
+    const merged = incoming.map(d => ({ ...d, checked: false }));
+    data = merged;
+    nextId = data.length ? Math.max(...data.map(d => d.id)) + 1 : 1;
+    save();
+    renderTable();
+    updateStats();
+    updateSyncBadge('ok', '已拉取 ' + incoming.length + ' 筆');
+    setLastSyncTime();
+  } catch (err) {
+    updateSyncBadge('error');
+    alert('拉取失敗：' + err.message + '\n\n提示：\n1. 確認 Apps Script 已部署\n2. 執行權限設為「所有人」\n3. 試算表 URL 正確');
+  }
+}
+
+// 頁面載入時恢復 GAS URL
+loadGasUrl();
 
 function downloadPNG(){
   const docEl=document.getElementById('doc-content');
