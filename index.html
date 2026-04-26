@@ -558,7 +558,7 @@ function saveGasUrl() {
 }
 
 function loadGasUrl() {
-  const defaultUrl = 'https://script.google.com/macros/s/AKfycbzybAeXvT7zgG5lQE-Dtkhh_0xHQGL394XoAtbAMArOGZoFA4_75mcG2KfcPtXYGwQv2A/exec';
+  const defaultUrl = 'https://script.google.com/macros/s/AKfycbw8PANCKqNeJGPLIrFeOBE3T_0Rx3POZdRUXbATy8cE7Xr-EXXDZuS70njnQibceaXtnw/exec';
   const stored = localStorage.getItem(GAS_URL_KEY);
   const url = stored || defaultUrl;
   if (!stored) localStorage.setItem(GAS_URL_KEY, defaultUrl);
