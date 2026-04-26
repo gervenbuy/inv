@@ -12,7 +12,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .main{display:flex;flex-direction:column;overflow:hidden}
 .header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e8e8e8}
 h1{font-size:15px;font-weight:600;color:#1a1a1a}
-.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;display:inline-block}
 .badge-blue{background:#E6F1FB;color:#185FA5}
 .badge-green{background:#EAF3DE;color:#3B6D11}
 .badge-amber{background:#FAEEDA;color:#854F0B}
@@ -242,7 +242,7 @@ function renderTable(){
       <td id="cell-project-${d.id}" ondblclick="startEdit(${d.id},'project')">${d.editing==='project'?`<input class='inline-edit' id='edit-${d.id}-project' value='${d.project}' onblur='commitEdit(${d.id},"project")' onkeydown='editKey(event,${d.id},"project")'>`:`<span>${d.project}</span>`}</td>
       <td id="cell-detail-${d.id}" ondblclick="startEdit(${d.id},'detail')" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d.detail}">${d.editing==='detail'?`<input class='inline-edit' id='edit-${d.id}-detail' value='${d.detail}' onblur='commitEdit(${d.id},"detail")' onkeydown='editKey(event,${d.id},"detail")'>`:`<span>${d.detail||'—'}</span>`}</td>
       <td class="amount-cell" id="cell-amount-${d.id}" ondblclick="startEdit(${d.id},'amount')">${d.editing==='amount'?`<input class='inline-edit' id='edit-${d.id}-amount' value='${d.amount}' type='number' onblur='commitEdit(${d.id},"amount")' onkeydown='editKey(event,${d.id},"amount")' style='width:90px'>`:`<span>${fmtAmt(d.amount)}</span>`}</td>
-      <td><span class="badge ${d.closed?'badge-green':'badge-amber'}">${d.closed?'已收款':'進行中'}</span></td>
+      <td style="min-width:72px"><span class="badge ${d.closed?'badge-green':'badge-amber'}">${d.closed?'已收款':'進行中'}</span></td>
       <td class="actions-cell">
         <button class="icon-btn" title="編輯" onclick="openEditModal(${d.id})">✏️</button>
         <button class="icon-btn" title="${d.closed?'標記未收':'標記收款'}" onclick="toggleStatus(${d.id})">${d.closed?'↩':'✓'}</button>
